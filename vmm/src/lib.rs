@@ -23,8 +23,13 @@ pub fn test_vm() {
         0xf4,       /* hlt */
     ];
 
-    let mem_size = 0x1000;
-    let load_addr = GuestAddress(0x1000);
+    let mem_size = 0x1000; 
+    let load_addr = GuestAddress(0x1000);  // 虚拟机物理地址
+    // GuestRegionMmap: implementation of GuestMemoryRegion providing 
+    // a wrapper used to map VM's physical address into a (mmap_region, offset) tuple.
+    // GuestMemoryMmap: implementation of GuestMemory that manages a collection of
+    // GuestRegionMmap objects for a VM.
+    // 将一段虚拟机物理地址 映射
     let mem = GuestMemoryMmap::new(&vec![(load_addr, mem_size)]).unwrap();
 
     let kvm = Kvm::new().expect("new KVM instance creation failed");
@@ -44,7 +49,7 @@ pub fn test_vm() {
     })
     .expect("Cannot configure guest memory");
 
-    mem.write_slice(&code, load_addr)
+    mem.write_slice(&code, load_addr)  // 将指令加载到虚拟机物理地址
         .expect("Writing code to memory failed");
 
     let vcpu_fd = vm_fd.create_vcpu(0).expect("new VcpuFd failed");
